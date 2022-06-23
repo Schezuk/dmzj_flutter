@@ -20,6 +20,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
+import 'package:flutter_dmzj/app/api/api_util.dart'; //patch
+import 'package:fixnum/fixnum.dart' as $fixnum;
 
 class ComicDetailPage extends StatefulWidget {
   final int comicId;
@@ -29,8 +31,7 @@ class ComicDetailPage extends StatefulWidget {
   _ComicDetailPageState createState() => _ComicDetailPageState();
 }
 
-class _ComicDetailPageState extends State<ComicDetailPage>
-    with AutomaticKeepAliveClientMixin {
+class _ComicDetailPageState extends State<ComicDetailPage> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -85,9 +86,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                       ? IconButton(
                           icon: Icon(Icons.favorite),
                           onPressed: () async {
-                            var result = await UserHelper.comicSubscribe(
-                                widget.comicId,
-                                cancel: true);
+                            var result = await UserHelper.comicSubscribe(widget.comicId, cancel: true);
                             if (result) {
                               setState(() {
                                 _isSubscribe = false;
@@ -97,8 +96,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                       : IconButton(
                           icon: Icon(Icons.favorite_border),
                           onPressed: () async {
-                            var result =
-                                await UserHelper.comicSubscribe(widget.comicId);
+                            var result = await UserHelper.comicSubscribe(widget.comicId);
                             if (result) {
                               setState(() {
                                 _isSubscribe = true;
@@ -107,20 +105,15 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                           }),
                   PopupMenuButton<String>(
                     itemBuilder: (e) => [
-                      PopupMenuItem<String>(
-                          value: 'download', child: new Text('下载')),
-                      PopupMenuItem<String>(
-                          value: 'share', child: new Text('分享漫画')),
+                      PopupMenuItem<String>(value: 'download', child: new Text('下载')),
+                      PopupMenuItem<String>(value: 'share', child: new Text('分享漫画')),
                     ],
                     icon: Icon(Icons.more_vert),
                     onSelected: (e) {
                       if (e == "share") {
-                        Share.share(
-                            "${_detail.title}\r\nhttp://m.dmzj.com/info/${_detail.comicPy}.html");
+                        Share.share("${_detail.title}\r\nhttp://m.dmzj.com/info/${_detail.comicPy}.html");
                       } else {
-                        if (_detail == null ||
-                            _detail.chapters == null ||
-                            _detail.chapters.length == 0) {
+                        if (_detail == null || _detail.chapters == null || _detail.chapters.length == 0) {
                           Fluttertoast.showToast(msg: '没有可以下载的章节');
                           return;
                         }
@@ -138,8 +131,11 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                   //     onPressed: () => Share.share(
                   //         "${_detail.title}\r\nhttp://m.dmzj.com/info/${_detail.comic_py}.html")),
                 ],
-                bottom: TabBar(
-                    tabs: [Tab(text: "详情"), Tab(text: "评论"), Tab(text: "相关")]),
+                bottom: TabBar(tabs: [
+                  Tab(text: "详情"),
+                  Tab(text: "评论"),
+                  Tab(text: "相关")
+                ]),
               ),
               body: TabBarView(
                 children: [
@@ -150,12 +146,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                       children: <Widget>[
                         Column(
                           children: (_related?.author_comics ?? [])
-                              .map<Widget>((f) => _getItem(
-                                      f.author_name + "的其他作品", f.data,
-                                      icon: Icon(Icons.chevron_right),
-                                      ratio: getWidth() /
-                                          ((getWidth() * (360 / 270)) + 36),
-                                      ontap: () {
+                              .map<Widget>((f) => _getItem(f.author_name + "的其他作品", f.data, icon: Icon(Icons.chevron_right), ratio: getWidth() / ((getWidth() * (360 / 270)) + 36), ontap: () {
                                     Utils.openPage(context, f.author_id, 8);
                                   }))
                               .toList(),
@@ -185,9 +176,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                   )
                 : Container(
                     padding: EdgeInsets.all(24),
-                    child: Text(_noCopyright
-                        ? "漫画ID:${widget.comicId}\r\n因版权、国家法规等原因，该漫画暂时无法观看。"
-                        : ""),
+                    child: Text(_noCopyright ? "漫画ID:${widget.comicId}\r\n因版权、国家法规等原因，该漫画暂时无法观看。" : ""),
                   ),
           );
   }
@@ -207,12 +196,10 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       InkWell(
-                        onTap: () =>
-                            Utils.showImageViewDialog(context, _detail.cover),
+                        onTap: () => Utils.showImageViewDialog(context, _detail.cover),
                         child: Container(
                           width: 100,
-                          child:
-                              Utils.createCacheImage(_detail.cover, 270, 360),
+                          child: Utils.createCacheImage(_detail.cover, 270, 360),
                         ),
                       ),
                       SizedBox(
@@ -248,13 +235,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                             ),
                             SizedBox(height: 2),
                             Text(
-                              "最后更新:" +
-                                  DateUtil.formatDate(
-                                      DateTime.fromMillisecondsSinceEpoch(
-                                          int.parse(_detail.lastUpdatetime
-                                                  .toString()) *
-                                              1000),
-                                      format: "yyyy-MM-dd"),
+                              "最后更新:" + DateUtil.formatDate(DateTime.fromMillisecondsSinceEpoch(int.parse(_detail.lastUpdatetime.toString()) * 1000), format: "yyyy-MM-dd"),
                               style: TextStyle(color: Colors.grey),
                             ),
                           ],
@@ -264,9 +245,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                   ),
                   Container(
                     child: Wrap(
-                      children: _detail.types
-                          .map<Widget>((f) => createTagItem(f.tagName, f.tagId))
-                          .toList(),
+                      children: _detail.types.map<Widget>((f) => createTagItem(f.tagName, f.tagId)).toList(),
                     ),
                   )
                 ],
@@ -298,8 +277,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-          heroTag: null, child: Icon(Icons.play_arrow), onPressed: openRead),
+      floatingActionButton: FloatingActionButton(heroTag: null, child: Icon(Icons.play_arrow), onPressed: openRead),
     );
   }
 
@@ -328,36 +306,17 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                         physics: null,
                         itemCount: f.data.length,
                         padding: EdgeInsets.all(2),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 8.0,
-                            crossAxisSpacing: 8.0,
-                            childAspectRatio: 6 / 2),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, mainAxisSpacing: 8.0, crossAxisSpacing: 8.0, childAspectRatio: 6 / 2),
                         itemBuilder: (context, i) {
                           return OutlineButton(
-                            borderSide: BorderSide(
-                                color: f.data[i].chapterId == historyChapter
-                                    ? Theme.of(context).accentColor
-                                    : Colors.grey.withOpacity(0.6)),
+                            borderSide: BorderSide(color: f.data[i].chapterId == historyChapter ? Theme.of(context).accentColor : Colors.grey.withOpacity(0.6)),
                             child: Text(
                               f.data[i].chapterTitle,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: f.data[i].chapterId == historyChapter
-                                      ? Theme.of(context).accentColor
-                                      : Theme.of(context)
-                                          .textTheme
-                                          .bodyText1
-                                          .color),
+                              style: TextStyle(color: f.data[i].chapterId == historyChapter ? Theme.of(context).accentColor : Theme.of(context).textTheme.bodyText1.color),
                             ),
                             onPressed: () async {
-                              await Utils.openComicReader(
-                                  context,
-                                  widget.comicId,
-                                  _detail.title,
-                                  _isSubscribe,
-                                  f.data,
-                                  f.data[i]);
+                              await Utils.openComicReader(context, widget.comicId, _detail.title, _isSubscribe, f.data, f.data[i]);
                               updateHistory();
                             },
                           );
@@ -374,8 +333,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                 child: Text("岂可修！竟然没有章节！"),
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-          heroTag: null, child: Icon(Icons.play_arrow), onPressed: openRead),
+      floatingActionButton: FloatingActionButton(heroTag: null, child: Icon(Icons.play_arrow), onPressed: openRead),
     );
   }
 
@@ -386,8 +344,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
         minWidth: 20,
         height: 24,
         child: OutlineButton(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           textColor: Theme.of(context).accentColor,
           borderSide: BorderSide(color: Theme.of(context).accentColor),
           child: Text(
@@ -403,10 +360,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
   }
 
   void openRead() async {
-    if (_detail == null ||
-        _detail.chapters == null ||
-        _detail.chapters.length == 0 ||
-        _detail.chapters[0].data.length == 0) {
+    if (_detail == null || _detail.chapters == null || _detail.chapters.length == 0 || _detail.chapters[0].data.length == 0) {
       Fluttertoast.showToast(msg: '没有可读的章节');
       return;
     }
@@ -414,36 +368,25 @@ class _ComicDetailPageState extends State<ComicDetailPage>
       ComicDetailChapterInfoResponse _item;
       ComicDetailChapterResponse chpters;
       for (var item in _detail.chapters) {
-        var first = item.data.firstWhere((f) => f.chapterId == historyChapter,
-            orElse: () => null);
+        var first = item.data.firstWhere((f) => f.chapterId == historyChapter, orElse: () => null);
         if (first != null) {
           chpters = item;
           _item = first;
         }
       }
       if (_item != null) {
-        await Utils.openComicReader(context, widget.comicId, _detail.title,
-            _isSubscribe, chpters.data, _item);
+        await Utils.openComicReader(context, widget.comicId, _detail.title, _isSubscribe, chpters.data, _item);
         updateHistory();
         return;
       }
     }
     var _chapters = _detail.chapters[0].data;
     _chapters.sort((x, y) => x.chapterOrder.compareTo(y.chapterOrder));
-    await Utils.openComicReader(context, widget.comicId, _detail.title,
-        _isSubscribe, _chapters, _chapters.first);
+    await Utils.openComicReader(context, widget.comicId, _detail.title, _isSubscribe, _chapters, _chapters.first);
     updateHistory();
   }
 
-  Widget _getItem(String title, List items,
-      {Icon icon,
-      Function ontap,
-      bool needSubTitle = true,
-      int count = 3,
-      int type = 1,
-      double ratio = 3 / 5.2,
-      double imgWidth = 270,
-      double imgHeight = 360}) {
+  Widget _getItem(String title, List items, {Icon icon, Function ontap, bool needSubTitle = true, int count = 3, int type = 1, double ratio = 3 / 5.2, double imgWidth = 270, double imgHeight = 360}) {
     return Offstage(
         offstage: items == null || items.length == 0,
         child: Column(
@@ -463,17 +406,8 @@ class _ComicDetailPageState extends State<ComicDetailPage>
                     shrinkWrap: true,
                     physics: ScrollPhysics(),
                     itemCount: items.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: count,
-                        crossAxisSpacing: 4.0,
-                        mainAxisSpacing: 4.0,
-                        childAspectRatio: ratio),
-                    itemBuilder: (context, i) => _getComicItemBuilder(
-                        items[i].id, type, items[i].cover, items[i].name,
-                        author: needSubTitle ? items[i].status : "",
-                        url: '',
-                        width: imgWidth,
-                        height: imgHeight),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: count, crossAxisSpacing: 4.0, mainAxisSpacing: 4.0, childAspectRatio: ratio),
+                    itemBuilder: (context, i) => _getComicItemBuilder(items[i].id, type, items[i].cover, items[i].name, author: needSubTitle ? items[i].status : "", url: '', width: imgWidth, height: imgHeight),
                   ),
                 ],
               ),
@@ -505,14 +439,9 @@ class _ComicDetailPageState extends State<ComicDetailPage>
     );
   }
 
-  Widget _getComicItemBuilder(int id, int type, String pic, String title,
-      {String author = "",
-      String url = "",
-      double width = 270,
-      double height = 360}) {
+  Widget _getComicItemBuilder(int id, int type, String pic, String title, {String author = "", String url = "", double width = 270, double height = 360}) {
     return RawMaterialButton(
-      onPressed: () =>
-          Utils.openPage(context, id, type, url: url, title: title),
+      onPressed: () => Utils.openPage(context, id, type, url: url, title: title),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       padding: EdgeInsets.all(4),
       child: Container(
@@ -586,7 +515,33 @@ class _ComicDetailPageState extends State<ComicDetailPage>
       // var jsonMap = jsonDecode(responseStr);
 
       // ComicDetail detail = ComicDetail.fromJson(jsonMap);
-      var detail = await ComicApi.instance.getDetail(widget.comicId);
+      bool failed = false;
+      ComicDetailInfoResponse detail;
+      try {
+        detail = await ComicApi.instance.getDetail(widget.comicId);
+      } catch (e) {
+        failed = true;
+        Fluttertoast.showToast(msg: e.toString());
+      }
+      if (failed || detail == null || detail.chapters == null || detail.chapters.length == 0) {
+        String path = "https://api.dmzj.com/dynamic/comicinfo/${widget.comicId.toString()}.json";
+        String result = await HttpUtil.instance.httpGet(
+          path,
+          queryParameters: ApiUtil.defaultParameter(needLogined: true),
+        ); //text
+        Map res = jsonDecode(result);
+        var info = res['data']['info'];
+        var list = res['data']['list'];
+        var alone = res['data']['alone'];
+        List<ComicDetailChapterInfoResponse> ch_list = List<ComicDetailChapterInfoResponse>.from(list.map((e) => new ComicDetailChapterInfoResponse(chapterId: int.parse(e['id'] ?? '0'), chapterTitle: e['chapter_name'] ?? '0', updatetime: $fixnum.Int64.parseInt(e['updatetime'] ?? '0'), filesize: int.parse(e['filesize'] ?? '0'), chapterOrder: int.parse(e['chapter_order'] ?? '0'))));
+        List<ComicDetailChapterInfoResponse> ch_alone = List<ComicDetailChapterInfoResponse>.from(alone.map((e) => new ComicDetailChapterInfoResponse(chapterId: int.parse(e['id'] ?? '0'), chapterTitle: e['chapter_name'] ?? '0', updatetime: $fixnum.Int64.parseInt(e['updatetime'] ?? '0'), filesize: int.parse(e['filesize'] ?? '0'), chapterOrder: int.parse(e['chapter_order'] ?? '0'))));
+        List<ComicDetailChapterResponse> ch = List<ComicDetailChapterResponse>.from([
+          new ComicDetailChapterResponse(title: "神隐", data: ch_list),
+          new ComicDetailChapterResponse(title: "单独", data: ch_alone)
+        ]);
+        ComicDetailInfoResponse detail2 = new ComicDetailInfoResponse(id: detail?.id ?? int.parse(info['id'] ?? 0), title: detail?.title ?? info['title'] ?? '', direction: detail?.direction ?? int.parse(info['direction'] ?? '0'), islong: detail?.islong ?? int.parse(info['islong'] ?? '0'), isDmzj: detail?.isDmzj ?? int.parse(info['isDmzj'] ?? '0'), cover: detail?.cover ?? info['cover'] ?? '', description: detail?.description ?? info['description'] ?? '', lastUpdatetime: detail?.lastUpdatetime ?? $fixnum.Int64.parseInt(info['last_updatetime'] ?? '0'), lastUpdateChapterName: detail?.lastUpdateChapterName ?? info['last_update_chapter_name'] ?? '', copyright: detail?.copyright ?? int.parse(info['copyright'] ?? '0'), firstLetter: detail?.firstLetter ?? info['first_letter'] ?? '', comicPy: detail?.comicPy ?? info['comicPy'] ?? info['first_letter'] ?? '', hidden: detail?.hidden ?? int.parse(info['hidden'] ?? '0'), hotNum: detail?.hotNum ?? int.parse(info['hotNum'] ?? '0'), hitNum: detail?.hitNum ?? int.parse(info['hitNum'] ?? '0'), uid: detail?.uid ?? int.parse(info['uid'] ?? '0'), isLock: detail?.isLock ?? int.parse(info['isLock'] ?? '0'), lastUpdateChapterId: detail?.lastUpdateChapterId ?? int.parse(info['lastUpdateChapterId'] ?? '0'), types: detail?.types ?? null, status: detail?.status ?? null, authors: detail?.authors ?? null, subscribeNum: detail?.subscribeNum ?? int.parse(info['subscribeNum'] ?? '0'), chapters: ch, isNeedLogin: detail?.isNeedLogin ?? int.parse(info['isNeedLogin'] ?? '0'), isHideChapter: detail?.isHideChapter ?? int.parse(info['isHideChapter'] ?? '0'),);
+        detail = detail2;
+      }
       if (detail.title == null || detail.title == "") {
         setState(() {
           _loading = false;
@@ -621,8 +576,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
 
   Future loadRelated() async {
     try {
-      var response =
-          await http.get(Uri.parse(Api.comicRelated(widget.comicId)));
+      var response = await http.get(Uri.parse(Api.comicRelated(widget.comicId)));
 
       var jsonMap = jsonDecode(response.body);
 
@@ -641,9 +595,7 @@ class _ComicDetailPageState extends State<ComicDetailPage>
       if (!ConfigHelper.getUserIsLogined() ?? false) {
         return;
       }
-      var response = await http.get(Uri.parse(Api.comicCheckSubscribe(
-          widget.comicId,
-          Provider.of<AppUserInfo>(context, listen: false).loginInfo.uid)));
+      var response = await http.get(Uri.parse(Api.comicCheckSubscribe(widget.comicId, Provider.of<AppUserInfo>(context, listen: false).loginInfo.uid)));
       var jsonMap = jsonDecode(response.body);
       setState(() {
         _isSubscribe = jsonMap["code"] == 0;
@@ -660,16 +612,13 @@ class ComicChapterView extends StatefulWidget {
   final bool isSubscribe;
   final int historyChapter;
   final Function openReader;
-  ComicChapterView(this.comicId, this.detail, this.historyChapter,
-      {Key key, this.isSubscribe = false, this.openReader})
-      : super(key: key);
+  ComicChapterView(this.comicId, this.detail, this.historyChapter, {Key key, this.isSubscribe = false, this.openReader}) : super(key: key);
 
   @override
   _ComicChapterViewState createState() => _ComicChapterViewState();
 }
 
-class _ComicChapterViewState extends State<ComicChapterView>
-    with AutomaticKeepAliveClientMixin {
+class _ComicChapterViewState extends State<ComicChapterView> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -708,30 +657,22 @@ class _ComicChapterViewState extends State<ComicChapterView>
                         Expanded(
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Text(
-                                f.title +
-                                    "(共" +
-                                    f.data.length.toString() +
-                                    "话)",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: Text(f.title + "(共" + f.data.length.toString() + "话)", style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         ),
                         InkWell(
                           onTap: () {
                             setState(() {
                               if (f.desc) {
-                                f.data.sort((x, y) =>
-                                    x.chapterOrder.compareTo(y.chapterOrder));
+                                f.data.sort((x, y) => x.chapterOrder.compareTo(y.chapterOrder));
                               } else {
-                                f.data.sort((x, y) =>
-                                    y.chapterOrder.compareTo(x.chapterOrder));
+                                f.data.sort((x, y) => y.chapterOrder.compareTo(x.chapterOrder));
                               }
                               f.desc = !f.desc;
                             });
                           },
                           child: Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 4, horizontal: 8),
+                            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                             child: Text(f.desc ? "排序 ↓" : "排序 ↑"),
                           ),
                         ),
@@ -740,15 +681,9 @@ class _ComicChapterViewState extends State<ComicChapterView>
                     GridView.builder(
                       shrinkWrap: true,
                       physics: ScrollPhysics(),
-                      itemCount:
-                          f.data.length > 14 ? (f.showNum + 1) : f.data.length,
+                      itemCount: f.data.length > 14 ? (f.showNum + 1) : f.data.length,
                       padding: EdgeInsets.all(2),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              MediaQuery.of(context).size.width ~/ 120,
-                          mainAxisSpacing: 8.0,
-                          crossAxisSpacing: 8.0,
-                          childAspectRatio: 6 / 2),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: MediaQuery.of(context).size.width ~/ 120, mainAxisSpacing: 8.0, crossAxisSpacing: 8.0, childAspectRatio: 6 / 2),
                       itemBuilder: (context, i) {
                         if (f.data.length > 14 && f.showNum == 14 && i >= 14) {
                           return OutlineButton(
@@ -757,37 +692,19 @@ class _ComicChapterViewState extends State<ComicChapterView>
                                 f.showNum = f.data.length - 1;
                               });
                             },
-                            borderSide:
-                                BorderSide(color: Colors.grey.withOpacity(0.4)),
+                            borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
                             child: Text("· · ·"),
                           );
                         }
                         return OutlineButton(
-                          borderSide: BorderSide(
-                              color:
-                                  f.data[i].chapterId == widget.historyChapter
-                                      ? Theme.of(context).accentColor
-                                      : Colors.grey.withOpacity(0.4)),
+                          borderSide: BorderSide(color: f.data[i].chapterId == widget.historyChapter ? Theme.of(context).accentColor : Colors.grey.withOpacity(0.4)),
                           child: Text(
                             f.data[i].chapterTitle,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color:
-                                    f.data[i].chapterId == widget.historyChapter
-                                        ? Theme.of(context).accentColor
-                                        : Theme.of(context)
-                                            .textTheme
-                                            .bodyText1
-                                            .color),
+                            style: TextStyle(color: f.data[i].chapterId == widget.historyChapter ? Theme.of(context).accentColor : Theme.of(context).textTheme.bodyText1.color),
                           ),
                           onPressed: () {
-                            Utils.openComicReader(
-                                context,
-                                widget.comicId,
-                                widget.detail.title,
-                                widget.isSubscribe,
-                                f.data,
-                                f.data[i]);
+                            Utils.openComicReader(context, widget.comicId, widget.detail.title, widget.isSubscribe, f.data, f.data[i]);
                           },
                         );
                       },
@@ -806,10 +723,7 @@ class _ComicChapterViewState extends State<ComicChapterView>
   }
 
   void openRead() async {
-    if (widget.detail == null ||
-        widget.detail.chapters == null ||
-        widget.detail.chapters.length == 0 ||
-        widget.detail.chapters[0].data.length == 0) {
+    if (widget.detail == null || widget.detail.chapters == null || widget.detail.chapters.length == 0 || widget.detail.chapters[0].data.length == 0) {
       Fluttertoast.showToast(msg: '没有可读的章节');
       return;
     }
@@ -817,26 +731,17 @@ class _ComicChapterViewState extends State<ComicChapterView>
       ComicDetailChapterInfoResponse _item;
       ComicDetailChapterResponse chpters;
       for (var item in widget.detail.chapters) {
-        var first = item.data.firstWhere(
-            (f) => f.chapterId == widget.historyChapter,
-            orElse: () => null);
+        var first = item.data.firstWhere((f) => f.chapterId == widget.historyChapter, orElse: () => null);
         if (first != null) {
           chpters = item;
           _item = first;
         }
       }
       if (_item != null) {
-        Utils.openComicReader(context, widget.comicId, widget.detail.title,
-            widget.isSubscribe, chpters.data, _item);
+        Utils.openComicReader(context, widget.comicId, widget.detail.title, widget.isSubscribe, chpters.data, _item);
         return;
       }
     }
-    Utils.openComicReader(
-        context,
-        widget.comicId,
-        widget.detail.title,
-        widget.isSubscribe,
-        widget.detail.chapters[0].data,
-        widget.detail.chapters[0].data.last);
+    Utils.openComicReader(context, widget.comicId, widget.detail.title, widget.isSubscribe, widget.detail.chapters[0].data, widget.detail.chapters[0].data.last);
   }
 }
