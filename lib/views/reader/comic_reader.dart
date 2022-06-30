@@ -937,6 +937,7 @@ class _ComicReaderPageState extends State<ComicReaderPage> {
         var response = await http.get(Uri.parse(api));
         responseBody = response.bodyBytes;
       } catch (e) {
+          Fluttertoast.showToast(msg: e.toString());
         var file = await _cacheManager.getFileFromCache(api);
         if (file != null) {
           responseBody = await file.file.readAsBytes();
@@ -976,6 +977,7 @@ class _ComicReaderPageState extends State<ComicReaderPage> {
       await UserHelper.comicAddComicHistory(
           widget.comicId, _currentItem.chapterId);
     } catch (e) {
+        Fluttertoast.showToast(msg: e.toString());
       print(e);
     } finally {
       setState(() {
@@ -1001,6 +1003,7 @@ class _ComicReaderPageState extends State<ComicReaderPage> {
         _viewPoints = ls;
       });
     } catch (e) {
+        Fluttertoast.showToast(msg: e.toString());
       print(e);
     }
   }
