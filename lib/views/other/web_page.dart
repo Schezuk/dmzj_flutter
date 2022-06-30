@@ -17,13 +17,16 @@ class _WebViewPageState extends State<WebViewPage> {
 
   @override
   void setState(fn) {
+      try{
     if (mounted) {
       super.setState(fn);
     }
+      }catch(e){print(e);}
   }
 
   @override
   Widget build(BuildContext context) {
+      try{
     return Scaffold(
       appBar: AppBar(
         title: Text(_title),
@@ -56,5 +59,6 @@ class _WebViewPageState extends State<WebViewPage> {
         },
       ),
     );
+  }catch(e){print(e);}
   }
 }
