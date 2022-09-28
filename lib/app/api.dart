@@ -154,7 +154,7 @@ class Api {
 
   /// 漫画章节详情(手机网页)
   static String comicWebChapterDetail(int comicId, int chapterId) {
-    return "http://m.muwai.com/chapinfo/$comicId/$chapterId.html";
+    return "http://m.dmzj.com/chapinfo/$comicId/$chapterId.html";//"http://m.muwai.com/chapinfo/$comicId/$chapterId.html";
   }
 
   /// 漫画吐槽
